@@ -33,12 +33,7 @@ df_merge2 = pd.merge(df_merge, df_eur, how='left', on='PROPNUM')
 
 df_merge2.rename(columns={'Wet_Gas':'Wet_Gas_EUR', 'Dry_Gas':'Dry_Gas_EUR', 'Oil':'Oil_EUR', 'NGL':'NGL_EUR'}, inplace=True)
 
-qc = df_merge2[df_merge2['Oil_EUR'].isnull()]
-qc.to_excel('../other/qc_table.xlsx')
+# qc = df_merge2[df_merge2['Oil_EUR'].isnull()]
+# qc.to_excel('../other/qc_table.xlsx', index=False)
 
-# df_merge2.to_csv('../other/frac_merge.csv')
-#
-df_daily = pd.read_excel('../other/AC_DAILY.xlsx')
-cols = df_daily.columns.tolist()
-cols = [col.replace(' ', '_') for col in cols]
-df_daily.columns = cols
+df_merge2[df_merge2['Oil_EUR'].notnull()].to_csv('../other/frac_merge_drop.csv', index=False)
