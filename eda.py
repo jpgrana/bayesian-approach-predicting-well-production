@@ -36,4 +36,5 @@ df_merge2.rename(columns={'Wet_Gas':'Wet_Gas_EUR', 'Dry_Gas':'Dry_Gas_EUR', 'Oil
 # qc = df_merge2[df_merge2['Oil_EUR'].isnull()]
 # qc.to_excel('../other/qc_table.xlsx', index=False)
 
-df_merge2[df_merge2['Oil_EUR'].notnull()].to_csv('../other/frac_merge_drop.csv', index=False)
+df_out = df_merge2[df_merge2['Oil_EUR'].notnull()]
+df_out.to_csv('../other/frac_merge.csv', index=False)
