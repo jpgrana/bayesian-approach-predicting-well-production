@@ -57,6 +57,8 @@ if __name__ == '__main__':
 
     df['Days_Production'] = get_days_production('PROPNUM', df, df_daily)
     df['OIL_Peak'], df['OIL_Days_to_Peak'] = get_peak_production('PROPNUM', df, df_daily)
+    df['ISIP/Ft'].replace(0.0, df['ISIP/Ft'].mean(), inplace=True)
+    df['5"_SIP/Ft'].replace(0.0, df['5"_SIP/Ft'].mean(), inplace=True)
     df.to_csv('../other/frac_merge_peak.csv', index=False)
 
     # plot_production('R9EKGTQ2EH', df_daily) # 26 days production
