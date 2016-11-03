@@ -1,55 +1,61 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.cross_validation import train_test_split
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LinearRegression
 
 
 df = pd.read_csv('../other/frac_merge_peak.csv')
 
-X = df[[u'Completed_Feet', u'#_of_Stages', u'Stage_Length', u'Clusters/Stage', u'Cluster_Spacing', u'Perfs/Cluster', u'Fluid_Bbls', u'Fluid_Gal/Ft', u'Fluid_Gal/Cluster', u'Fluid_Gal/Perf', u'Prop_Lbs', u'Prop_Lbs/Ft', u'Prop_Lbs/Cluster', u'Prop_Lbs/Perf', u'Avg_Prop_Conc', u'Max_Prop_Conc', u'Avg_Rate', u'Max_Rate', u'Rate/Ft', u'Rate/Cluster', u'Rate/Perf', u'Avg_Pressure', u'Max_Pressure', u'ISIP/Ft', u'5"_SIP/Ft']]
-X_primary = df[[u'Completed_Feet', u'#_of_Stages', u'Stage_Length', u'Clusters/Stage', u'Perfs/Cluster', u'Fluid_Bbls', u'Prop_Lbs']]
-X_secondary = df[[u'Cluster_Spacing', u'Fluid_Gal/Ft', u'Fluid_Gal/Cluster', u'Fluid_Gal/Perf', u'Prop_Lbs/Ft', u'Prop_Lbs/Cluster', u'Prop_Lbs/Perf', u'Avg_Prop_Conc', u'Max_Prop_Conc', u'Avg_Rate', u'Max_Rate', u'Rate/Ft', u'Rate/Cluster', u'Rate/Perf', u'Avg_Pressure', u'Max_Pressure', u'ISIP/Ft', u'5"_SIP/Ft']]
+X = df[[u'Completed_Feet', u'#_of_Stages', u'Stage_Length', u'Clusters/Stage', u'Cluster_Spacing', u'Perfs/Cluster', u'Fluid_Bbls', u'Fluid_Gal/Ft', u'Fluid_Gal/Cluster', u'Fluid_Gal/Perf', u'Prop_Lbs', u'Prop_Lbs/Ft', u'Prop_Lbs/Cluster', u'Prop_Lbs/Perf', u'Avg_Prop_Conc', u'Max_Prop_Conc', u'Avg_Rate', u'Max_Rate', u'Rate/Ft', u'Rate/Cluster', u'Rate/Perf', u'Avg_Pressure', u'Max_Pressure', u'ISIP/Ft', u'5"_SIP/Ft', u'XEC_FIELD', u'Reservoir']]
 y = df[[u'OIL_Peak']]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
+
+X_train_primary = X_train[[u'Completed_Feet', u'#_of_Stages', u'Stage_Length', u'Clusters/Stage', u'Perfs/Cluster', u'Fluid_Bbls', u'Prop_Lbs', u'XEC_FIELD', u'Reservoir']]
+X_train_secondary = X_train[[u'Cluster_Spacing', u'Fluid_Gal/Ft', u'Fluid_Gal/Cluster', u'Fluid_Gal/Perf', u'Prop_Lbs/Ft', u'Prop_Lbs/Cluster', u'Prop_Lbs/Perf', u'Avg_Prop_Conc', u'Max_Prop_Conc', u'Avg_Rate', u'Max_Rate', u'Rate/Ft', u'Rate/Cluster', u'Rate/Perf', u'Avg_Pressure', u'Max_Pressure', u'ISIP/Ft', u'5"_SIP/Ft', u'XEC_FIELD', u'Reservoir']]
 
 # Feature Extraction with Recursive Feature Elimination
 model = LinearRegression()
 rfe = RFE(model, 1)
-fit = rfe.fit(X, y)
-for col, rank in sorted(zip(X.columns, fit.ranking_), key=lambda x : x[1]):
+fit = rfe.fit(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
+for col, rank in sorted(zip(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
     print col, rank
+print '*' * 50
 '''
-Rate/Ft 1
-ISIP/Ft 2
-5"_SIP/Ft 3
-Avg_Prop_Conc 4
-Perfs/Cluster 5
-Rate/Perf 6
+ISIP/Ft 1
+5"_SIP/Ft 2
+Rate/Ft 3
+Rate/Perf 4
+Avg_Prop_Conc 5
+Perfs/Cluster 6
 Rate/Cluster 7
 Clusters/Stage 8
-Max_Rate 9
+Avg_Rate 9
 Max_Prop_Conc 10
-Avg_Rate 11
-#_of_Stages 12
-Cluster_Spacing 13
-Stage_Length 14
+Max_Rate 11
+Cluster_Spacing 12
+Stage_Length 13
+#_of_Stages 14
 Fluid_Gal/Ft 15
-Completed_Feet 16
-Fluid_Gal/Perf 17
+Prop_Lbs/Ft 16
+Prop_Lbs/Perf 17
 Avg_Pressure 18
-Prop_Lbs/Ft 19
-Prop_Lbs/Perf 20
-Max_Pressure 21
+Fluid_Gal/Perf 19
+Max_Pressure 20
+Completed_Feet 21
 Prop_Lbs/Cluster 22
-Fluid_Gal/Cluster 23
-Fluid_Bbls 24
+Fluid_Bbls 23
+Fluid_Gal/Cluster 24
 Prop_Lbs 25
 '''
 model = LinearRegression()
 rfe = RFE(model, 1)
-fit = rfe.fit(X_primary, y)
-for col, rank in sorted(zip(X_primary.columns, fit.ranking_), key=lambda x : x[1]):
+fit = rfe.fit(X_train_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
+for col, rank in sorted(zip(X_train_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
     print col, rank
+print '*' * 50
 '''
 Clusters/Stage 1
 Perfs/Cluster 2
@@ -61,26 +67,41 @@ Prop_Lbs 7
 '''
 model = LinearRegression()
 rfe = RFE(model, 1)
-fit = rfe.fit(X_secondary, y)
-for col, rank in sorted(zip(X_secondary.columns, fit.ranking_), key=lambda x : x[1]):
+fit = rfe.fit(X_train_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
+for col, rank in sorted(zip(X_train_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
     print col, rank
+print '*' * 50
 '''
-Rate/Ft 1
-ISIP/Ft 2
-5"_SIP/Ft 3
-Avg_Prop_Conc 4
-Rate/Perf 5
+ISIP/Ft 1
+5"_SIP/Ft 2
+Rate/Ft 3
+Rate/Perf 4
+Avg_Prop_Conc 5
 Max_Prop_Conc 6
 Rate/Cluster 7
 Max_Rate 8
 Avg_Rate 9
-Prop_Lbs/Ft 10
-Fluid_Gal/Ft 11
-Avg_Pressure 12
-Cluster_Spacing 13
-Prop_Lbs/Perf 14
+Cluster_Spacing 10
+Avg_Pressure 11
+Prop_Lbs/Ft 12
+Prop_Lbs/Perf 13
+Max_Pressure 14
 Fluid_Gal/Perf 15
-Max_Pressure 16
+Fluid_Gal/Ft 16
 Prop_Lbs/Cluster 17
 Fluid_Gal/Cluster 18
 '''
+
+print 'All:'
+print X.groupby('XEC_FIELD')['XEC_FIELD'].count()
+print 'Train:'
+print X_train.groupby('XEC_FIELD')['XEC_FIELD'].count()
+print 'Test:'
+print X_test.groupby('XEC_FIELD')['XEC_FIELD'].count()
+print '*' * 50
+print 'All:'
+print X.groupby('Reservoir')['Reservoir'].count()
+print 'Train:'
+print X_train.groupby('Reservoir')['Reservoir'].count()
+print 'Test:'
+print X_test.groupby('Reservoir')['Reservoir'].count()
