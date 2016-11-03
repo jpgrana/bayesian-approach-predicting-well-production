@@ -15,6 +15,8 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
 
 X_train_primary = X_train[[u'Completed_Feet', u'#_of_Stages', u'Stage_Length', u'Clusters/Stage', u'Perfs/Cluster', u'Fluid_Bbls', u'Prop_Lbs', u'XEC_FIELD', u'Reservoir']]
 X_train_secondary = X_train[[u'Cluster_Spacing', u'Fluid_Gal/Ft', u'Fluid_Gal/Cluster', u'Fluid_Gal/Perf', u'Prop_Lbs/Ft', u'Prop_Lbs/Cluster', u'Prop_Lbs/Perf', u'Avg_Prop_Conc', u'Max_Prop_Conc', u'Avg_Rate', u'Max_Rate', u'Rate/Ft', u'Rate/Cluster', u'Rate/Perf', u'Avg_Pressure', u'Max_Pressure', u'ISIP/Ft', u'5"_SIP/Ft', u'XEC_FIELD', u'Reservoir']]
+X_test_primary = X_test[[u'Completed_Feet', u'#_of_Stages', u'Stage_Length', u'Clusters/Stage', u'Perfs/Cluster', u'Fluid_Bbls', u'Prop_Lbs', u'XEC_FIELD', u'Reservoir']]
+X_test_secondary = X_test[[u'Cluster_Spacing', u'Fluid_Gal/Ft', u'Fluid_Gal/Cluster', u'Fluid_Gal/Perf', u'Prop_Lbs/Ft', u'Prop_Lbs/Cluster', u'Prop_Lbs/Perf', u'Avg_Prop_Conc', u'Max_Prop_Conc', u'Avg_Rate', u'Max_Rate', u'Rate/Ft', u'Rate/Cluster', u'Rate/Perf', u'Avg_Pressure', u'Max_Pressure', u'ISIP/Ft', u'5"_SIP/Ft', u'XEC_FIELD', u'Reservoir']]
 
 # Feature Extraction with Recursive Feature Elimination
 model = LinearRegression()
@@ -23,7 +25,12 @@ fit = rfe.fit(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
 for col, rank in sorted(zip(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
     print col, rank
 print '*' * 50
+model.fit(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
+model.predict(X_test.drop(['XEC_FIELD', 'Reservoir'], axis=1))
+print 'Test All R2: {0}'.format(model.score(X_test.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_test))
+print '*' * 50
 '''
+Feature Ranking All:
 ISIP/Ft 1
 5"_SIP/Ft 2
 Rate/Ft 3
@@ -56,7 +63,12 @@ fit = rfe.fit(X_train_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
 for col, rank in sorted(zip(X_train_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
     print col, rank
 print '*' * 50
+model.fit(X_train_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
+model.predict(X_test_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1))
+print 'Test Primary R2: {0}'.format(model.score(X_test_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_test))
+print '*' * 50
 '''
+Feature Ranking Primary:
 Clusters/Stage 1
 Perfs/Cluster 2
 #_of_Stages 3
@@ -71,7 +83,12 @@ fit = rfe.fit(X_train_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_trai
 for col, rank in sorted(zip(X_train_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
     print col, rank
 print '*' * 50
+model.fit(X_train_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
+model.predict(X_test_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1))
+print 'Test Secondary R2: {0}'.format(model.score(X_test_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_test))
+print '*' * 50
 '''
+Feature Ranking Secondary:
 ISIP/Ft 1
 5"_SIP/Ft 2
 Rate/Ft 3
@@ -91,17 +108,3 @@ Fluid_Gal/Ft 16
 Prop_Lbs/Cluster 17
 Fluid_Gal/Cluster 18
 '''
-
-print 'All:'
-print X.groupby('XEC_FIELD')['XEC_FIELD'].count()
-print 'Train:'
-print X_train.groupby('XEC_FIELD')['XEC_FIELD'].count()
-print 'Test:'
-print X_test.groupby('XEC_FIELD')['XEC_FIELD'].count()
-print '*' * 50
-print 'All:'
-print X.groupby('Reservoir')['Reservoir'].count()
-print 'Train:'
-print X_train.groupby('Reservoir')['Reservoir'].count()
-print 'Test:'
-print X_test.groupby('Reservoir')['Reservoir'].count()
