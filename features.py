@@ -24,8 +24,10 @@ X_test_secondary = X_test[[u'Cluster_Spacing', u'Fluid_Gal/Ft', u'Fluid_Gal/Clus
 model = LinearRegression()
 rfe = RFE(model, 1)
 fit = rfe.fit(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
+rank_all = []
 for col, rank in sorted(zip(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
     print col, rank
+    rank_all.append(col)
 print '*' * 50
 model.fit(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
 print 'Train All R2: {0}'.format(model.score(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train))
@@ -64,8 +66,10 @@ Prop_Lbs 25
 model = LinearRegression()
 rfe = RFE(model, 1)
 fit = rfe.fit(X_train_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
+rank_primary = []
 for col, rank in sorted(zip(X_train_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
     print col, rank
+    rank_primary.append(col)
 print '*' * 50
 model.fit(X_train_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
 print 'Train Primary R2: {0}'.format(model.score(X_train_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train))
@@ -86,8 +90,10 @@ Prop_Lbs 7
 model = LinearRegression()
 rfe = RFE(model, 1)
 fit = rfe.fit(X_train_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
+rank_secondary = []
 for col, rank in sorted(zip(X_train_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
     print col, rank
+    rank_secondary.append(col)
 print '*' * 50
 model.fit(X_train_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
 print 'Train Secondary R2: {0}'.format(model.score(X_train_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train))
