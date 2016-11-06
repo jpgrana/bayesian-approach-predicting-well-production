@@ -1,13 +1,14 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 from Savitzky_Golay_Filter import savitzky_golay
 
 
-def plot_production(propnum, df, window=31, poly=5):
-    y_oil = df[df['PROPNUM'] == propnum]['OIL'].reset_index(drop=True)
-    y_gas = df[df['PROPNUM'] == propnum]['GAS'].reset_index(drop=True)
-    y_water = df[df['PROPNUM'] == propnum]['WATER'].reset_index(drop=True)
+def plot_production(propnum, df1, df2, window=31, poly=5):
+    y_oil = df2[df2['PROPNUM'] == propnum]['OIL'].reset_index(drop=True)
+    y_gas = df2[df2['PROPNUM'] == propnum]['GAS'].reset_index(drop=True)
+    y_water = df2[df2['PROPNUM'] == propnum]['WATER'].reset_index(drop=True)
     x = range(len(y_oil))
     y_oil_smooth = savitzky_golay(y_oil.values, window, poly)
     fig = plt.figure(figsize=(12,8))
@@ -25,6 +26,10 @@ def plot_production(propnum, df, window=31, poly=5):
     ax.set_xlim([0, len(y_oil)])
     ax.set_ylim([0, 8000])
     plt.show()
+    # # Optional save production graphs
+    # path = '../other/production_plots/' + propnum + '_' + str(df1[df1['PROPNUM'] == propnum]['Days_Production'].values[0]) + 'DaysOn_' + str(y_oil_smooth.argmax()) + 'DaysPeak'
+    # plt.savefig(path, dpi=400)
+    # plt.close()
 
 def get_days_production(col, df1, df2):
     days = []
@@ -61,7 +66,11 @@ if __name__ == '__main__':
     df['5"_SIP/Ft'].replace(0.0, df['5"_SIP/Ft'].mean(), inplace=True)
     df.to_csv('../other/frac_merge_peak.csv', index=False)
 
-    # plot_production('R9EKGTQ2EH', df_daily) # 26 days production
-    # plot_production('R7FF76VL8I', df_daily) # 53 days production
-    # plot_production('L28IBM1H37', df_daily) # 2459 days production
-    # plot_production('PAVGTJAB8R', df_daily) # 155 days peak
+    # # Production graph examples
+    # plot_production('R9EKGTQ2EH', df, df_daily) # 26 days production
+    # plot_production('R7FF76VL8I', df, df_daily) # 53 days production
+    # plot_production('L28IBM1H37', df, df_daily) # 2459 days production
+    # plot_production('PAVGTJAB8R', df, df_daily) # 155 days peak
+    # # Optional save production graphs
+    # for propnum in df['PROPNUM']:
+    #     plot_production(propnum, df, df_daily)
