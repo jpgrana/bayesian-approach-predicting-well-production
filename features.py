@@ -20,11 +20,18 @@ X_test_secondary = X_test[[u'Cluster_Spacing', u'Fluid_Gal/Ft', u'Fluid_Gal/Clus
 
 # Feature Extraction with Recursive Feature Elimination
 
+def standardize_2sd(df):
+    return (df - df.mean(0)) / (2 * df.std(0))
+
+def standardize_2sd_test(df_test, df_train):
+    return (df_test - df_train.mean(0)) / (2 * df_train.std(0))
+
 # All Features
 model = LinearRegression()
 rfe = RFE(model, 1)
 fit = rfe.fit(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
 rank_all = []
+print 'Feature Ranking All:'
 for col, rank in sorted(zip(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
     print col, rank
     rank_all.append(col)
@@ -62,11 +69,55 @@ Fluid_Gal/Cluster 24
 Prop_Lbs 25
 '''
 
+# All Features normalized
+model = LinearRegression()
+rfe = RFE(model, 1)
+fit = rfe.fit(standardize_2sd(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1)), y_train)
+rank_all_norm = []
+print 'Feature Ranking All - Normalized:'
+for col, rank in sorted(zip(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
+    print col, rank
+    rank_all_norm.append(col)
+print '*' * 50
+model.fit(standardize_2sd(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1)), y_train)
+print 'Train All - Norm R2: {0}'.format(model.score(standardize_2sd(X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1)), y_train))
+print 'Test All - Norm R2: {0}'.format(model.score(standardize_2sd_test(X_test.drop(['XEC_FIELD', 'Reservoir'], axis=1), X_train.drop(['XEC_FIELD', 'Reservoir'], axis=1)), y_test))
+print '*' * 50
+'''
+Feature Ranking All - Normalized:
+Cluster_Spacing 1
+Rate/Cluster 2
+Stage_Length 3
+Avg_Rate 4
+Clusters/Stage 5
+Fluid_Gal/Ft 6
+Rate/Perf 7
+Fluid_Gal/Perf 8
+5"_SIP/Ft 9
+ISIP/Ft 10
+Rate/Ft 11
+Fluid_Bbls 12
+Prop_Lbs 13
+Prop_Lbs/Cluster 14
+Prop_Lbs/Ft 15
+Prop_Lbs/Perf 16
+Perfs/Cluster 17
+Avg_Pressure 18
+Fluid_Gal/Cluster 19
+Completed_Feet 20
+Max_Pressure 21
+Max_Rate 22
+#_of_Stages 23
+Max_Prop_Conc 24
+Avg_Prop_Conc 25
+'''
+
 # Primary Features
 model = LinearRegression()
 rfe = RFE(model, 1)
 fit = rfe.fit(X_train_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
 rank_primary = []
+print 'Feature Ranking Primary:'
 for col, rank in sorted(zip(X_train_primary.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
     print col, rank
     rank_primary.append(col)
@@ -91,6 +142,7 @@ model = LinearRegression()
 rfe = RFE(model, 1)
 fit = rfe.fit(X_train_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1), y_train)
 rank_secondary = []
+print 'Feature Ranking Secondary:'
 for col, rank in sorted(zip(X_train_secondary.drop(['XEC_FIELD', 'Reservoir'], axis=1).columns, fit.ranking_), key=lambda x : x[1]):
     print col, rank
     rank_secondary.append(col)
@@ -121,5 +173,16 @@ Prop_Lbs/Cluster 17
 Fluid_Gal/Cluster 18
 '''
 
-# Ranked Features
+# Features ordered by rank
 rank = [u'Rate/Ft', u'ISIP/Ft', u'5"_SIP/Ft',  u'Avg_Prop_Conc', u'Perfs/Cluster', u'Rate/Perf', u'Rate/Cluster', u'Clusters/Stage', u'Max_Rate', u'Max_Prop_Conc', u'Avg_Rate', u'#_of_Stages', u'Cluster_Spacing', u'Stage_Length', u'Fluid_Gal/Ft', u'Completed_Feet', u'Fluid_Gal/Ft', u'Avg_Pressure', u'Prop_Lbs/Ft', u'Prop_Lbs/Perf', u'Max_Pressure', u'Prop_Lbs/Cluster', u'Fluid_Gal/Cluster', u'Fluid_Bbls', u'Prop_Lbs']
+
+# Features selected by rank and correlation < 0.9
+select = [u'Clusters/Stage', u'Perfs/Cluster', u'#_of_Stages', u'ISIP/Ft', u'Rate/Ft', u'Rate/Perf', u'Avg_Prop_Conc', u'Max_Prop_Conc', u'Rate/Cluster', u'Max_Rate', u'Cluster_Spacing', u'Avg_Pressure', u'Prop_Lbs/Ft', u'Prop_Lbs/Perf', u'Max_Pressure', u'Fluid_Gal/Perf', u'Fluid_Gal/Ft', u'Prop_Lbs/Cluster', u'Fluid_Gal/Cluster']
+
+# Model score from select features
+model = LinearRegression()
+print '*' * 50
+model.fit(X_train[select], y_train)
+print 'Train Select R2: {0}'.format(model.score(X_train[select], y_train))
+print 'Test Select R2: {0}'.format(model.score(X_test[select], y_test))
+print '*' * 50
