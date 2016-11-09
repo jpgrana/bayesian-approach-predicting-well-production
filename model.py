@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pymc3 as pm
-from theano import shared
 from sklearn.cross_validation import train_test_split
 import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
@@ -30,28 +29,26 @@ def standardize_2sd_test(df_test, df_train):
 X_OLS_train = sm.add_constant(standardize_2sd(X_train))
 model = sm.OLS(y_train, X_OLS_train)
 model = model.fit()
-print model.summary()
+# print model.summary()
 
 #Linear regression model scores
 model = LinearRegression(fit_intercept=True, normalize=False)
 model.fit(X_OLS_train.drop('const', axis=1), y_train)
-print 'Train R2: {0}'.format(model.score(X_OLS_train.drop('const', axis=1), y_train))
+print 'Unnormalized OLS Train R2: {0}'.format(model.score(X_OLS_train.drop('const', axis=1), y_train))
 X_OLS_test = standardize_2sd_test(X_test, X_train)
-print 'Test R2: {0}'.format(model.score(X_OLS_test, y_test))
+print 'Unnormalized OLS Test R2: {0}'.format(model.score(X_OLS_test, y_test))
 
 #Regularized Lasso model summary
 lasso = sm.OLS(y_train, X_OLS_train).fit_regularized(alpha=1, L1_wt=1)
-print lasso.summary()
+# print lasso.summary()
 
 #regularized Lasso model score
-X_lasso_train = X_train[[u'Clusters/Stage', u'Perfs/Cluster', u'#_of_Stages', u'ISIP/Ft', u'Rate/Ft', u'Rate/Perf', u'Avg_Prop_Conc', u'Max_Prop_Conc', u'Rate/Cluster', u'Max_Rate', u'Avg_Pressure', u'Max_Pressure', u'Fluid_Gal/Perf']]
-X_lasso_train_std = standardize_2sd(X_lasso_train)
+X_lasso_train_std = standardize_2sd(X_train)
 model = LinearRegression(fit_intercept=True, normalize=False)
 model.fit(X_lasso_train_std, y_train)
-print 'Train R2: {0}'.format(model.score(X_lasso_train_std, y_train))
-X_lasso_test = X_test[[u'Clusters/Stage', u'Perfs/Cluster', u'#_of_Stages', u'ISIP/Ft', u'Rate/Ft', u'Rate/Perf', u'Avg_Prop_Conc', u'Max_Prop_Conc', u'Rate/Cluster', u'Max_Rate', u'Avg_Pressure', u'Max_Pressure', u'Fluid_Gal/Perf']]
-X_lasso_test_std = standardize_2sd_test(X_lasso_test, X_lasso_train)
-print 'Test R2: {0}'.format(model.score(X_lasso_test_std, y_test))
+print 'Normalized OLS Train R2: {0}'.format(model.score(X_lasso_train_std, y_train))
+X_lasso_test_std = standardize_2sd_test(X_test, X_train)
+print 'Normalized OLS Test R2: {0}'.format(model.score(X_lasso_test_std, y_test))
 
 #Define local functions
 def plot_traces(traces, retain=1000):
@@ -98,16 +95,21 @@ def custom_forestplot(df, ylabel='field', size=8, aspect=0.8, facetby=None):
     _ = g.axes.flat[0].set_yticks(np.arange(df['ypos'].max()+1))
     _ = g.axes.flat[0].set_yticklabels(df.index)
 
-#Share variable for prediction on test data
-X_shared = shared(X_lasso_train_std.values)
+#Variable to re-run model or load from disk
+run_pooled = True
 
 #Run PYMC unpooled model using GLM notation
-data = dict(x=X_shared, y=y_train.values)
+data = dict(x=X_lasso_train_std, y=y_train)
 
 with pm.Model() as mdl_pooled:
     pm.glm.glm('y ~ x', data, family=pm.glm.families.Normal())
-    step = pm.NUTS()
-    trc_pooled = pm.sample(2000, step, progressbar=True)
+    if run_pooled:
+        trc_pooled = pm.backends.text.load('../other/traces_txt/trc_pooled')
+    else:
+        step = pm.NUTS()
+        start = pm.find_MAP()
+        trace = pm.backends.Text('../other/traces_txt/trc_pooled')
+        trc_pooled = pm.sample(2000, njobs=1, step=step, start=start, trace=trace)
 
 #Plot coefficents posterior
 # plot_traces(trc_pooled, retain=1000)
@@ -122,18 +124,16 @@ with pm.Model() as mdl_pooled:
 # plt.figure(figsize=(12, 24))
 # pm.forestplot(trc_pooled)
 
-#Run unpooled model metrics
+#Run unpooled model metrics for training data
 ppc_pooled = pm.sample_ppc(trc_pooled[-1000:], samples=500, model=mdl_pooled, size=50)
 y_pred = ppc_pooled['y'].mean(0).mean(0).T
 waic_pooled = pm.stats.waic(model=mdl_pooled, trace=trc_pooled[-1000:])
-print 'Train_RMSE: {0}'.format(np.sqrt(mean_squared_error(y_train, y_pred)))
-print 'Train_R2: {0}'.format(r2_score(y_train, y_pred))
-print 'Train_WAIC: {0}'.format(waic_pooled)
+print 'Bayesian Train RMSE: {0}'.format(np.sqrt(mean_squared_error(y_train, y_pred)))
+print 'Bayesian Train R2: {0}'.format(r2_score(y_train, y_pred))
+print 'Bayesian Train WAIC: {0}'.format(waic_pooled)
 
-X_shared.set_value(X_lasso_test_std.values)
-ppc_shared = pm.sample_ppc(trc_pooled[-1000:], samples=500, model=mdl_pooled, size=50)
-y_pred = ppc_shared['y'].mean(0).mean(0).T
-waic_shared = pm.stats.waic(model=mdl_pooled, trace=trc_pooled[-1000:])
-print 'Train_RMSE: {0}'.format(np.sqrt(mean_squared_error(y_train, y_pred)))
-print 'Train_R2: {0}'.format(r2_score(y_train, y_pred))
-print 'Train_WAIC: {0}'.format(waic_pooled)
+#Run unpooled model metrics for test data
+parm_pooled = pm.df_summary(trc_pooled[-1000:]).values
+y_pred_test = parm_pooled[0,0] + np.dot(X_lasso_test_std.values, parm_pooled[1:-1,0])
+print 'Bayesian Test RMSE: {0}'.format(np.sqrt(mean_squared_error(y_test, y_pred_test)))
+print 'Bayesian Test R2: {0}'.format(r2_score(y_test, y_pred_test))
