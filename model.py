@@ -14,10 +14,7 @@ from sklearn.metrics import r2_score
 #Data load and setup
 df = pd.read_csv('../other/frac_merge_peak.csv')
 
-df['XEC_FIELD_Code'] = pd.Categorical(df['XEC_FIELD']).codes
-df['Reservoir_Code'] = pd.Categorical(df['Reservoir']).codes
-
-X = df[[u'Clusters/Stage', u'Perfs/Cluster', u'#_of_Stages', u'ISIP/Ft', u'Rate/Ft', u'Rate/Perf', u'Avg_Prop_Conc', u'Max_Prop_Conc', u'Rate/Cluster', u'Max_Rate', u'Cluster_Spacing', u'Avg_Pressure', u'Prop_Lbs/Ft', u'Prop_Lbs/Perf', u'Max_Pressure', u'Fluid_Gal/Perf', u'Fluid_Gal/Ft', u'Prop_Lbs/Cluster', u'Fluid_Gal/Cluster', u'XEC_FIELD', u'Reservoir']]
+X = df[[u'Clusters/Stage', u'Perfs/Cluster', u'#_of_Stages', u'ISIP/Ft', u'Rate/Ft', u'Rate/Perf', u'Avg_Prop_Conc', u'Max_Prop_Conc', u'Rate/Cluster', u'Max_Rate', u'Avg_Pressure', u'Max_Pressure', u'Fluid_Gal/Perf']]
 y = df[[u'OIL_Peak']]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
@@ -30,7 +27,7 @@ def standardize_2sd_test(df_test, df_train):
     return (df_test - df_train.mean(0)) / (2 * df_train.std(0))
 
 #Linear regression model summary
-X_OLS_train = sm.add_constant(standardize_2sd(X_train.drop([u'XEC_FIELD_Code', u'Reservoir_Code'], axis=1)))
+X_OLS_train = sm.add_constant(standardize_2sd(X_train))
 model = sm.OLS(y_train, X_OLS_train)
 model = model.fit()
 print model.summary()
@@ -39,7 +36,7 @@ print model.summary()
 model = LinearRegression(fit_intercept=True, normalize=False)
 model.fit(X_OLS_train.drop('const', axis=1), y_train)
 print 'Train R2: {0}'.format(model.score(X_OLS_train.drop('const', axis=1), y_train))
-X_OLS_test = standardize_2sd_test(X_test.drop([u'XEC_FIELD_Code', u'Reservoir_Code'], axis=1), X_train.drop([u'XEC_FIELD_Code', u'Reservoir_Code'], axis=1))
+X_OLS_test = standardize_2sd_test(X_test, X_train)
 print 'Test R2: {0}'.format(model.score(X_OLS_test, y_test))
 
 #Regularized Lasso model summary
@@ -101,8 +98,11 @@ def custom_forestplot(df, ylabel='field', size=8, aspect=0.8, facetby=None):
     _ = g.axes.flat[0].set_yticks(np.arange(df['ypos'].max()+1))
     _ = g.axes.flat[0].set_yticklabels(df.index)
 
+#Share variable for prediction on test data
+X_shared = shared(X_lasso_train_std.values)
+
 #Run PYMC unpooled model using GLM notation
-data = dict(x=X_lasso_train_std, y=y_train)
+data = dict(x=X_shared, y=y_train.values)
 
 with pm.Model() as mdl_pooled:
     pm.glm.glm('y ~ x', data, family=pm.glm.families.Normal())
@@ -110,22 +110,30 @@ with pm.Model() as mdl_pooled:
     trc_pooled = pm.sample(2000, step, progressbar=True)
 
 #Plot coefficents posterior
-plot_traces(trc_pooled, retain=1000)
+# plot_traces(trc_pooled, retain=1000)
 
 #Summary coefficients posterior
-pm.df_summary(trc_pooled[-1000:])
+# pm.df_summary(trc_pooled[-1000:])
 
 #Autocorrelations for convergence check
-ax = pm.autocorrplot(trc_pooled[-1000:])
+# ax = pm.autocorrplot(trc_pooled[-1000:])
 
 #Plot credible intervals coefficients
-plt.figure(figsize=(12, 24))
-pm.forestplot(trc_pooled)
+# plt.figure(figsize=(12, 24))
+# pm.forestplot(trc_pooled)
 
 #Run unpooled model metrics
 ppc_pooled = pm.sample_ppc(trc_pooled[-1000:], samples=500, model=mdl_pooled, size=50)
-y_pred1 = ppc_pooled['y'].mean(0).mean(0).T
+y_pred = ppc_pooled['y'].mean(0).mean(0).T
 waic_pooled = pm.stats.waic(model=mdl_pooled, trace=trc_pooled[-1000:])
-print 'Train_RMSE: {0}'.format(np.sqrt(mean_squared_error(y_train, y_pred1)))
-print 'Train_R2: {0}'.format(r2_score(y_train, y_pred1))
+print 'Train_RMSE: {0}'.format(np.sqrt(mean_squared_error(y_train, y_pred)))
+print 'Train_R2: {0}'.format(r2_score(y_train, y_pred))
+print 'Train_WAIC: {0}'.format(waic_pooled)
+
+X_shared.set_value(X_lasso_test_std.values)
+ppc_shared = pm.sample_ppc(trc_pooled[-1000:], samples=500, model=mdl_pooled, size=50)
+y_pred = ppc_shared['y'].mean(0).mean(0).T
+waic_shared = pm.stats.waic(model=mdl_pooled, trace=trc_pooled[-1000:])
+print 'Train_RMSE: {0}'.format(np.sqrt(mean_squared_error(y_train, y_pred)))
+print 'Train_R2: {0}'.format(r2_score(y_train, y_pred))
 print 'Train_WAIC: {0}'.format(waic_pooled)
