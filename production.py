@@ -6,6 +6,11 @@ from Savitzky_Golay_Filter import savitzky_golay
 
 
 def plot_production(propnum, df1, df2, window=31, poly=5):
+    '''
+    Generate production plots from daily production data
+    INPUT: well id, df1, df2, filter window, polynomial fit order
+    OUTPUT:
+    '''
     y_oil = df2[df2['PROPNUM'] == propnum]['OIL'].reset_index(drop=True)
     y_gas = df2[df2['PROPNUM'] == propnum]['GAS'].reset_index(drop=True)
     y_water = df2[df2['PROPNUM'] == propnum]['WATER'].reset_index(drop=True)
@@ -32,6 +37,11 @@ def plot_production(propnum, df1, df2, window=31, poly=5):
     # plt.close()
 
 def get_days_production(col, df1, df2):
+    '''
+    Create data series for days on production
+    INPUT: column name to match dataframes, df1, df2
+    OUTPUT: data series
+    '''
     days = []
     for label in df1[col]:
         days.append(df2[df2[col] == label].shape[0])
@@ -39,6 +49,11 @@ def get_days_production(col, df1, df2):
     return df1['Days_Production']
 
 def get_peak_production(col, df1, df2, ftype='OIL', window=31, poly=5):
+    '''
+    Create data series for peak production
+    INPUT: column name to match dataframes, df1, df2, fluid type, filter window, polynomial fit order
+    OUTPUT: data series
+    '''
     peaks = []
     days_to_peak = []
     for label in df1[col]:
@@ -71,7 +86,7 @@ if __name__ == '__main__':
     # plot_production('R7FF76VL8I', df, df_daily) # 53 days production
     # plot_production('L28IBM1H37', df, df_daily) # 2459 days production
     # plot_production('PAVGTJAB8R', df, df_daily) # 155 days peak
-    
+
     # Optional save production graphs
     # for propnum in df['PROPNUM']:
     #     plot_production(propnum, df, df_daily)
