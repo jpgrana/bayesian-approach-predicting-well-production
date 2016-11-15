@@ -1,1 +1,7 @@
-This repo will contain a Bayesian analysis of predicting well production from completion parameters.  The data is from a shale play in the US.  Production from any well is a result of both geologic and completion parameters (engineering parameters for how well is treated prior to production).  Geologic factors include saturation of fluids (gas, oil, water), amount of fluids (porosity), path to flow (permeability) and drive to flow (pressure).  Completion parameters include how wells are pressurized to create new channels for flow and how those channels are propped open to enhance natural permeability.  The goal of this study is to find whether a reasonable model can be built to predict well production based on completion parameters only.  The hypothesis (controversial) is that geologic parameters are consistent enough in a shale play that engineering parameters can capture the variability in well production.  The model will utilize Bayesian linear regression with the ability to multi-level variables such as geologic field and formation.
+# Bayesian Approach to Predicting Well Production
+
+This repo contains a Bayesian analysis of predicting well production from completion parameters in a shale reservoir.  The dataset was 178 wells and 25 features, which is not made available.  The model is Bayesian hierarchical linear-regression implemented from the PyMC3 library in Python.
+
+
+
+![GitHub Logo](/images/b0_dist_reservoir.png)
