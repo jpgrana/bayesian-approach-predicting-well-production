@@ -101,19 +101,6 @@ if __name__ == '__main__':
             trace = pm.backends.Text('../other/traces_txt/trc_pooled')
             trc_pooled = pm.sample(2000, njobs=1, step=step, start=start, trace=trace)
 
-    #Plot coefficents posterior
-    plot_traces(trc_pooled, retain=1000)
-
-    #Summary coefficients posterior
-    pm.df_summary(trc_pooled[-1000:])
-
-    #Autocorrelations for convergence check
-    ax = pm.autocorrplot(trc_pooled[-1000:])
-
-    #Plot credible intervals coefficients
-    plt.figure(figsize=(12, 24))
-    pm.forestplot(trc_pooled)
-
     #Run unpooled model metrics for training data
     ppc_pooled = pm.sample_ppc(trc_pooled[-1000:], samples=500, model=mdl_pooled, size=50)
     y_pred = ppc_pooled['y'].mean(0).mean(0).T
