@@ -22,11 +22,11 @@ The features were reduced from 25 to 13 using a two-step process.  First, a corr
 
 What makes Bayesian modeling different is that instead of estimating single values for the model parameters and resulting predictions, we estimate distributions and carry the probabilities through the modeling process.  The pooled description for this model refers to running a single regression on all the data, without regard to reservoir zone or field.  If the inputs are standardized, we can interpret the importance of features based on their coefficient values relative to the zero line and their spreads.
 
-![GitHub Logo](/images/coeff_pooled.png)
+![GitHub Logo](/images/coeff_pooled_rm.png)
 
 We also get unique ranges for each prediction rather than estimating uncertainty from a uniform model average.
 
-![GitHub Logo](/images/pred_pooled.png)
+![GitHub Logo](/images/pred_pooled_rm.png)
 
 A histogram of the uncertainties for each prediction shows a range of +/- 92 to +/- 245 bbl with an average around +/- 140 bbl, based on two standard deviations.  This compares to an average of 188 bbl based on model RMSE.
 
