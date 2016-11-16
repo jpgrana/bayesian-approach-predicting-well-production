@@ -30,7 +30,7 @@ We also get unique ranges for each prediction rather than estimating uncertainty
 
 A histogram of the uncertainties for each prediction shows a range of +/- 92 to +/- 245 bbl with an average around +/- 140 bbl, based on two standard deviations.  This compares to an average of 188 bbl based on model RMSE.
 
-![GitHub Logo](/images/pred_uncertainty.png)
+![GitHub Logo](/images/pred_uncertainty_rm.png)
 
 ## Hierarchical Model
 
