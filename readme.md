@@ -20,11 +20,11 @@ The features were reduced from 25 to 13 using a two-step process.  First, a corr
 
 ## Pooled Model
 
-What makes Bayesian modeling different is that instead of estimating single values for the model parameters and resulting predictions, we estimate distributions and carry the uncertainty through the modeling process.  The pooled description for this model refers to running a single regression on all the data without regard to reservoir zone or field.  If the inputs are standardized, we can interpret the importance of features based on their coefficients relative to the zero line and their spreads.
+What makes Bayesian modeling different is that instead of estimating single values for the model parameters and resulting predictions, we estimate distributions and carry the probabilities through the modeling process.  The pooled description for this model refers to running a single regression on all the data, without regard to reservoir zone or field.  If the inputs are standardized, we can interpret the importance of features based on their coefficient values relative to the zero line and their spreads.
 
 ![GitHub Logo](/images/coeff_pooled.png)
 
-We also get unique uncertainties for each prediction rather than estimating uncertainty from a uniform model average.
+We also get unique ranges for each prediction rather than estimating uncertainty from a uniform model average.
 
 ![GitHub Logo](/images/pred_pooled.png)
 
@@ -34,10 +34,10 @@ A histogram of the uncertainties for each prediction shows a range of +/- 92 to 
 
 ## Hierarchical Model
 
-The hierarchical model involves either part-pooling or un-pooling the data in the model so that each reservoir zone is allowed to have its own intercept.  This makes sense because at least one of the reservoir zones shows higher average production.
+The hierarchical model involves either part-pooling or un-pooling the data so that each reservoir zone is allowed to have its own intercept.  This makes sense because at least one of the reservoir zones shows higher average production.
 
 ![GitHub Logo](/images/reservoir_violinplot.png)
 
-The part-pooled model assumes that the intercepts themselves come from a common distribution whereas the un-pooled model assumes they have independent distributions.  The pooled model is likely to under-fit the data whereas the un-pooled model is likely to over-fit.  The part-pooled model represents a compromise between the two extremes.  This is especially helpful when one of the zones has fewer wells so we utilize the common distribution of all zones to "fill-in" missing information.  In this case, the part-pooled model give the lowest test RMSE and is the preferred model.
+The part-pooled model assumes that the intercepts themselves come from a common distribution whereas the un-pooled model assumes they have independent distributions.  The pooled model is likely to under-fit the data whereas the un-pooled model is likely to over-fit.  The part-pooled model represents a compromise between the two extremes.  This is especially helpful when one of the zones has fewer wells so we can utilize the common distribution of all zones to "fill-in" missing information.  This borrowing of information leads to "shrinkage" of the uncertainty of the part-pooled intercepts relative to the un-pooled intercepts.  In this case, the part-pooled model give the lowest test RMSE and is the preferred model.
 
-![GitHub Logo](/images/b0_dist_reservoir.png)
+![GitHub Logo](/images/b0_dist_reservoir_rm.png)
