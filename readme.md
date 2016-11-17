@@ -24,7 +24,7 @@ What makes Bayesian modeling different is that instead of estimating single valu
 
 ![GitHub Logo](/images/coeff_pooled_rm.png)
 
-Besides the expected value, we also get unique ranges and probabilities for each prediction.
+Besides the expected value, we also get unique probabilities and ranges for each prediction.
 
 ![GitHub Logo](/images/pred_pooled_rm.png)
 
