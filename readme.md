@@ -24,11 +24,11 @@ What makes Bayesian modeling different is that instead of estimating single valu
 
 ![GitHub Logo](/images/coeff_pooled_rm.png)
 
-We also get unique ranges for each prediction rather than estimating uncertainty from a uniform model average.
+Besides the expected value, we also get unique ranges and probabilities for each prediction.
 
 ![GitHub Logo](/images/pred_pooled_rm.png)
 
-A histogram of the uncertainties for each prediction shows a range of +/- 92 to +/- 245 bbl with an average around +/- 140 bbl, based on two standard deviations.  This compares to an average of 188 bbl based on model RMSE.
+A histogram of the uncertainties for each prediction shows a range of +/- 90 to +/- 240 bbl/day, based on two standard deviations.  The model RMSE of +/- 188 bbl/day would probably be applied to all predictions in a non-Bayesian regression.
 
 ![GitHub Logo](/images/pred_uncertainty.png)
 
@@ -38,6 +38,12 @@ The hierarchical model involves either part-pooling or un-pooling the data so th
 
 ![GitHub Logo](/images/reservoir_violinplot.png)
 
-The part-pooled model assumes that the intercepts themselves come from a common distribution whereas the un-pooled model assumes they have independent distributions.  The pooled model is likely to under-fit the data whereas the un-pooled model is likely to over-fit.  The part-pooled model represents a compromise between the two extremes.  This is especially helpful when one of the zones has fewer wells so we can utilize the common distribution of all zones to "fill-in" missing information.  This borrowing of information leads to "shrinkage" of the uncertainty of the part-pooled intercepts relative to the un-pooled intercepts.  In this case, the part-pooled model give the lowest test RMSE and is the preferred model.
+The part-pooled model assumes that the intercepts themselves come from a common distribution whereas the un-pooled model assumes they have independent distributions.  The pooled model is likely to under-fit the data whereas the un-pooled model is likely to over-fit.  The part-pooled model represents a compromise between the two extremes.  This is especially helpful when one of the zones has fewer wells, so we can utilize the common distribution of all zones to "fill-in" missing information.  This borrowing of information leads to "shrinkage" of the uncertainty of the part-pooled intercepts relative to the un-pooled intercepts.  In this case, the part-pooled model reduces the test RMSE by about 20 bbl/day and is the preferred model.
 
 ![GitHub Logo](/images/b0_dist_reservoir_rm.png)
+
+## References
+
+This was a helpful example of the PyMC3 workflow by Jonathan Sedar:
+
+http://blog.applied.ai/bayesian-inference-with-pymc3-part-3/
