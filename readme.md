@@ -38,7 +38,7 @@ The hierarchical model involves either part-pooling or un-pooling the data so th
 
 ![GitHub Logo](/images/reservoir_violinplot.png)
 
-The part-pooled model assumes that the intercepts themselves come from a common distribution whereas the un-pooled model assumes they have independent distributions.  The pooled model is likely to under-fit the data whereas the un-pooled model is likely to over-fit.  The part-pooled model represents a compromise between the two extremes.  This is especially helpful when one of the zones has fewer wells, so we can utilize the common distribution of all zones to "fill-in" missing information.  This borrowing of information leads to "shrinkage" of the uncertainty of the part-pooled intercepts relative to the un-pooled intercepts.  In this case, the part-pooled model reduces the test RMSE by about 20 bbl/day and is the preferred model.
+The part-pooled model assumes that the intercepts themselves come from a common distribution whereas the un-pooled model assumes they have independent distributions.  The pooled model is likely to under-fit the data whereas the un-pooled model is likely to over-fit.  The part-pooled model represents a compromise between the two extremes.  This is especially helpful when one of the zones has fewer wells, so we can utilize the common distribution of all zones to "fill-in" missing information.  This borrowing of information leads to "shrinkage" of the uncertainty of the part-pooled intercepts relative to the un-pooled intercepts.  In this case, the part-pooled model reduces the test RMSE by about 20 bbl and is the preferred model.
 
 ![GitHub Logo](/images/b0_dist_reservoir_rm.png)
 
