@@ -28,7 +28,7 @@ Besides the expected value, we also get unique ranges and probabilities for each
 
 ![GitHub Logo](/images/pred_pooled_rm.png)
 
-A histogram of the uncertainties for each prediction shows a range of +/- 90 to +/- 240 bbl/day, based on two standard deviations.  The model RMSE of +/- 188 bbl/day would probably be applied to all predictions in a non-Bayesian regression.
+A histogram of the uncertainties for each prediction shows a range of +/- 90 to +/- 240 bbl, based on two standard deviations.  The model RMSE of +/- 188 bbl would probably be applied to all predictions in a non-Bayesian regression.
 
 ![GitHub Logo](/images/pred_uncertainty.png)
 
